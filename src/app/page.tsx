@@ -21,14 +21,32 @@ const Page = () => {
     })
   );
 
+  const testAi = useMutation(
+    trpc.testAi.mutationOptions({
+      onSuccess: (result) => {
+        console.log({ result });
+        toast.success(result.message);
+      },
+    })
+  );
+
   return (
     <div className="flex flex-col justify-center items-center min-h-screen min-w-screen gap-y-6 p-10">
       <h1 className="text-3xl font-bold">Welcome!</h1>
-      <div>{data?.map((item, index) => {
-        return <div key={item.id}>{index+1}: {item.name}</div>;
-      })}</div>
+      <div>
+        {data?.map((item, index) => {
+          return (
+            <div key={item.id}>
+              {index + 1}: {item.name}
+            </div>
+          );
+        })}
+      </div>
       <Button disabled={create.isPending} onClick={() => create.mutate()}>
         Create Workflow
+      </Button>
+      <Button disabled={testAi.isPending} onClick={() => testAi.mutate()}>
+        Test AI
       </Button>
       <Logout />
     </div>
