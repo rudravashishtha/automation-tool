@@ -98,6 +98,12 @@ const RegisterForm = () => {
                     type="button"
                     disabled={isPending}
                   >
+                    <Image
+                      src="/logos/github.svg"
+                      alt="GitHub"
+                      width={20}
+                      height={20}
+                    />
                     Continue with GitHub
                   </Button>
                   <Button
@@ -106,6 +112,12 @@ const RegisterForm = () => {
                     type="button"
                     disabled={isPending}
                   >
+                    <Image
+                      src="/logos/google.svg"
+                      alt="Google"
+                      width={20}
+                      height={20}
+                    />
                     Continue with Google
                   </Button>
                 </div>
@@ -134,11 +146,7 @@ const RegisterForm = () => {
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="******"
-                            {...field}
-                          />
+                          <Input type="text" placeholder="******" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
