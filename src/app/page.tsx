@@ -1,5 +1,7 @@
-import { Button } from "@/components/ui/button";
+import React from "react";
 
-export default function Home() {
-  return <div className="bg-red-100 p-6">Hello Word</div>;
-}
+const Page = async () => {
+  return <div>Hello</div>;
+};
+
+export default Page;
