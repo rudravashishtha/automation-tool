@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useWorkflowsParams } from "../hooks/use-workflows-params";
 import { useEntitySearch } from "@/hooks/use-entity-search";
 import { WorkflowIcon } from "lucide-react";
+import { EnhancedLoadingView } from "@/components/enhanced-loading-view";
 
 export const WorkflowsSearch = () => {
   const [params, setParams] = useWorkflowsParams();
@@ -113,7 +114,13 @@ export const WorkFlowsContainer = ({
 };
 
 export const WorkflowsLoading = () => {
-  return <LoadingView message="Loading workflows..." />;
+  return (
+    <EnhancedLoadingView 
+      message="Loading workflows..." 
+      showProgress={true}
+      duration={2000}
+    />
+  );
 };
 
 export const WorkflowsError = () => {

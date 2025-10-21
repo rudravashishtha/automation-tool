@@ -5,6 +5,7 @@ import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "@/components/ui/sonner";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { toasterPositions } from "@/config/constants";
+import { TopLoadingBar } from "@/components/top-loading-bar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <TopLoadingBar />
         <TRPCReactProvider>
           <NuqsAdapter>{children}</NuqsAdapter>
           <Toaster position={toasterPositions[0]} />

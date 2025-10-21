@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   AlertTriangleIcon,
   Loader2Icon,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { LoadingButton } from "./loading-button";
 import { Input } from "./ui/input";
 import {
   Empty,
@@ -59,10 +61,16 @@ export const EntityHeader = ({
         )}
       </div>
       {!!onNew && !newButtonHref && (
-        <Button size="sm" onClick={onNew} disabled={disabled || isCreating}>
+        <LoadingButton 
+          size="sm" 
+          onClick={onNew} 
+          disabled={disabled}
+          loading={isCreating}
+          loadingText="Creating..."
+        >
           <PlusIcon className="size-4" />
           {newButtonLabel}
-        </Button>
+        </LoadingButton>
       )}
       {!!newButtonHref && !onNew && (
         <Button size="sm" asChild>
@@ -213,10 +221,14 @@ export const EmptyView = ({
       )}
       {!!onNew && (
         <EmptyContent>
-          <Button onClick={onNew} disabled={!!btnDisabled}>
+          <LoadingButton 
+            onClick={onNew} 
+            loading={!!btnDisabled}
+            loadingText="Creating..."
+          >
             <PlusIcon className="size-4" />
             {addNewLabel || "Add New"}
-          </Button>
+          </LoadingButton>
         </EmptyContent>
       )}
     </Empty>
@@ -278,6 +290,8 @@ export const EntityItem = ({
   isRemoving,
   className,
 }: EntityItemProps) => {
+  const [isNavigating, setIsNavigating] = useState(false);
+
   const handleRemoveItem = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -288,28 +302,50 @@ export const EntityItem = ({
       await onRemove();
     }
   };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isRemoving) {
+      e.preventDefault();
+      return;
+    }
+    setIsNavigating(true);
+  };
+
   return (
-    <Link href={href} prefetch>
+    <Link href={href} prefetch onClick={handleClick}>
       <Card
         className={cn(
-          "p-4 shadow-none hover:shadow cursor-pointer",
-          isRemoving && "opacity-50 cursor-not-allowed",
+          "p-4 shadow-none hover:shadow cursor-pointer transition-all duration-200",
+          (isRemoving || isNavigating) && "opacity-50 cursor-not-allowed",
           className
         )}
       >
         <CardContent className="flex flex-row items-center justify-between p-0">
           <div className="flex items-center gap-3">
-            {!!image ? image : null}
+            {isNavigating ? (
+              <div className="size-8 flex items-center justify-center">
+                <Loader2Icon className="size-5 animate-spin text-primary" />
+              </div>
+            ) : (
+              image
+            )}
             <div>
-              <CardTitle className="text-base font-medium">{title}</CardTitle>
-              {!!subtitle && (
+              <CardTitle className="text-base font-medium">
+                {isNavigating ? "Loading..." : title}
+              </CardTitle>
+              {!!subtitle && !isNavigating && (
                 <CardDescription className="text-xs">
                   {subtitle}
                 </CardDescription>
               )}
+              {isNavigating && (
+                <CardDescription className="text-xs">
+                  Please wait while we load the workflow...
+                </CardDescription>
+              )}
             </div>
           </div>
-          {(actions || onRemove) && (
+          {(actions || onRemove) && !isNavigating && (
             <div className="flex items-center gap-x-4">
               {actions}
               {onRemove && (
