@@ -1,4 +1,3 @@
-import React from "react";
 import { SidebarTrigger } from "./ui/sidebar";
 
 const AppHeader = () => {

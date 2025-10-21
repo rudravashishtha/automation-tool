@@ -60,3 +60,35 @@ export const useRemoveWorkflow = () => {
     })
   );
 };
+
+/**
+ * Hook to fetch a single workflow using suspense
+ */
+export const useSuspenseWorkflow = (id: string) => {
+  const trpc = useTRPC();
+
+  return useSuspenseQuery(trpc.workflows.getOne.queryOptions({ id }));
+};
+
+/**
+ * Hook to rename a workflow
+ */
+export const useRenameWorkflow = () => {
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
+
+  return useMutation(
+    trpc.workflows.updateName.mutationOptions({
+      onSuccess: (workflow) => {
+        toast.success(`Workflow "${workflow.name}" renamed successfully!`);
+        queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({}));
+        queryClient.invalidateQueries(
+          trpc.workflows.getOne.queryOptions({ id: workflow.id })
+        );
+      },
+      onError: (error) => {
+        toast.error(`Failed to rename workflow: ${error.message}`);
+      },
+    })
+  );
+};

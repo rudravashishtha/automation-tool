@@ -168,7 +168,11 @@ export const WorkflowItem = ({ data }: { data: WorkflowType }) => {
       subtitle={
         <>
           {isUpdated ? (
-            <>Updated {formatDistanceToNow(updatedAt, { addSuffix: true })} </>
+            <>
+              Updated {formatDistanceToNow(updatedAt, { addSuffix: true })}{" "}
+              &bull; Created{" "}
+              {formatDistanceToNow(createdAt, { addSuffix: true })}{" "}
+            </>
           ) : (
             <>Created {formatDistanceToNow(createdAt, { addSuffix: true })}</>
           )}
