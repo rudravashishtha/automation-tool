@@ -26,12 +26,36 @@ export const useCreateWorkflow = () => {
 
   return useMutation(
     trpc.workflows.create.mutationOptions({
-      onSuccess: (data) => {
-        toast.success(`Workflow ${data.name} created successfully`);
+      onSuccess: (workflow) => {
+        toast.success(`Workflow "${workflow.name}" created successfully!`);
         queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({}));
       },
       onError: (error) => {
         toast.error(`Failed to create workflow: ${error.message}`);
+      },
+    })
+  );
+};
+
+/**
+ * Hook to delete a workflow
+ */
+
+export const useRemoveWorkflow = () => {
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
+
+  return useMutation(
+    trpc.workflows.remove.mutationOptions({
+      onSuccess: (workflow) => {
+        toast.success(`Workflow "${workflow.name}" removed successfully!`);
+        queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({}));
+        queryClient.invalidateQueries(
+          trpc.workflows.getOne.queryOptions({ id: workflow.id })
+        );
+      },
+      onError: (error) => {
+        toast.error(`Failed to delete workflow: ${error.message}`);
       },
     })
   );

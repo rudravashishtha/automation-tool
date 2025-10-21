@@ -68,7 +68,7 @@ const RegisterForm = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Account created successfully");
+          toast.success("Account created successfully!");
           router.push("/");
         },
         onError: (ctx) => {

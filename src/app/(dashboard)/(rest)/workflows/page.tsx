@@ -1,8 +1,11 @@
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { SearchParams } from "nuqs/server";
-import WorkflowsList, {
+import {
+  WorkflowsList,
   WorkFlowsContainer,
+  WorkflowsLoading,
+  WorkflowsError,
 } from "@/features/workflows/components/workflows";
 import { prefetchWorkflows } from "@/features/workflows/server/prefetch";
 import { requireAuth } from "@/lib/auth-utils";
@@ -22,8 +25,8 @@ const Page = async ({ searchParams }: Props) => {
   return (
     <WorkFlowsContainer>
       <HydrateClient>
-        <ErrorBoundary fallback={<p>Error fetching workflows</p>}>
-          <Suspense fallback={<p>Loading workflows...</p>}>
+        <ErrorBoundary fallback={<WorkflowsError />}>
+          <Suspense fallback={<WorkflowsLoading />}>
             <WorkflowsList />
           </Suspense>
         </ErrorBoundary>
