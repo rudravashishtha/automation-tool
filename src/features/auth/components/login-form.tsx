@@ -58,7 +58,7 @@ const LoginForm = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Logged in successfully");
+          toast.success("Logged in successfully!");
           router.push("/");
         },
         onError: (ctx) => {
