@@ -1,8 +1,10 @@
 import ky, { type Options as KyOptions } from "ky";
 import type { NodeExecutor } from "@/features/executions/types";
 import { NonRetriableError } from "inngest";
+import { tryParseHeaders } from "@/lib/utils";
 
 type HttpRequestData = {
+  headers?: string | Record<string, unknown> | null;
   endpoint?: string;
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: string;
@@ -14,10 +16,8 @@ export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
   context,
   step,
 }) => {
-  // TODO: Publish loadind state for http request
-
+  // Ensure endpoint is configured
   if (!data.endpoint) {
-    // TODO: Publish "error"
     throw new NonRetriableError("HTTP Request node: No endpoint configured");
   }
 
@@ -25,20 +25,50 @@ export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
     const method = data.method || "GET";
     const endpoint = data.endpoint!;
 
+    // Parse headers defensively using the shared util. Map any parsing errors
+    // to a NonRetriableError so the orchestration knows it's a config/user issue.
+    let parsedHeaders: Record<string, string>;
+    try {
+      parsedHeaders = tryParseHeaders(data.headers);
+    } catch (err) {
+      // preserve original error message if present
+      const msg =
+        err instanceof Error && err.message ? err.message : "Invalid headers";
+      throw new NonRetriableError(
+        `HTTP Request node: Invalid headers. Expected JSON object or key:value pairs. (${msg})`
+      );
+    }
+
     const options: KyOptions = {
       method,
+      throwHttpErrors: false,
     };
 
     if (["POST", "PUT", "PATCH"].includes(method)) {
       options.body = data.body;
+
+      const hasContentType = Object.keys(parsedHeaders).some(
+        (h) => h.toLowerCase() === "content-type"
+      );
+
+      if (!hasContentType) {
+        // Only add when the user hasn't provided Content-Type
+        parsedHeaders["Content-Type"] = "application/json";
+      }
     }
+
+    options.headers = parsedHeaders;
+
+    if (options.body !== undefined)
+      console.log(`[HttpRequestExecutor] body:`, options.body);
 
     const response = await ky(endpoint, options);
     const contentType = response.headers.get("content-type") ?? "";
-    const responseData = contentType?.includes("application/json")
+    const responseData = contentType.includes("application/json")
       ? await response.json().catch(() => response.text())
       : await response.text();
 
+    // Return context augmented with httpResponse
     return {
       ...context,
       httpResponse: {
@@ -48,8 +78,6 @@ export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
       },
     };
   });
-
-  // TODO: Publish "success/failure" state for http request
 
   return result;
 };
