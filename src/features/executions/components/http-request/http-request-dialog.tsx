@@ -31,9 +31,29 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { tryParseHeaders } from "@/lib/utils";
+
+const headersValidation = z
+  .string()
+  .transform((v) => (v == null ? "" : v))
+  .refine(
+    (val) => {
+      if (val.trim() === "") return true; // allow empty
+      try {
+        tryParseHeaders(val);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: "Invalid headers. Provide a JSON object.",
+    }
+  );
 
 const formSchema = z.object({
-  endpoint: z.url({
+  headers: headersValidation,
+  endpoint: z.string().url({
     message: "Please enter a valid URL.",
   }),
   method: z.enum(["GET", "POST", "PUT", "DELETE", "PATCH"]),
@@ -57,6 +77,7 @@ export const HttpRequestDialog = ({
 }: HttpRequestDialogProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
+      headers: defaultValues.headers || "",
       endpoint: defaultValues.endpoint || "",
       method: defaultValues.method || "GET",
       body: defaultValues.body || "",
@@ -68,6 +89,7 @@ export const HttpRequestDialog = ({
   useEffect(() => {
     if (open)
       form.reset({
+        headers: defaultValues.headers || "",
         endpoint: defaultValues.endpoint || "",
         method: defaultValues.method || "GET",
         body: defaultValues.body || "",
@@ -96,6 +118,28 @@ export const HttpRequestDialog = ({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-8 mt-4"
           >
+            <FormField
+              control={form.control}
+              name="headers"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Headers</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='{"Authorization": "Bearer {{authToken}}", "X-User": "{{user.id}}"}'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Provide headers as key-value pairs. You can use{" "}
+                    {"{{variables}}"} for simple values or {"{{json variable}}"}{" "}
+                    to inject stringified objects.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="method"
