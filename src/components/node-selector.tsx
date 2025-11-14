@@ -71,7 +71,7 @@ export function NodeSelector({
       }
 
       setNodes((currNodes) => {
-        const hasIntitalTrigger = currNodes.some(
+        const hasInitialTrigger = currNodes.some(
           (node) => node.type === NodeType.INITIAL
         );
 
@@ -90,7 +90,7 @@ export function NodeSelector({
           type: selectedNode.type,
         };
 
-        if (hasIntitalTrigger) {
+        if (hasInitialTrigger) {
           return [newNode];
         }
 

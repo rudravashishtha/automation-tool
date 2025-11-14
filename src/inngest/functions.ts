@@ -1,51 +1,49 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { NonRetriableError } from "inngest";
 import { inngest } from "./client";
-import { generateText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
-import { createAnthropic } from "@ai-sdk/anthropic";
+import prisma from "@/lib/db";
+import { toplogicalSort } from "./utils";
+import { NodeType } from "@/generated/prisma";
+import { getExecutor } from "@/features/executions/lib/executor-registry";
 
-const google = createGoogleGenerativeAI();
-const openai = createOpenAI();
-const anthropic = createAnthropic();
-
-export const executeAi = inngest.createFunction(
-  { id: "execute-ai" },
-  { event: "execute/ai" },
+export const executeWorkflow = inngest.createFunction(
+  { id: "execute-workflow" },
+  { event: "workflows/execute.workflow" },
   async ({ event, step }) => {
-    const { steps: geminiSteps } = await step.ai.wrap(
-      "gemini-generate-text",
-      generateText,
-      {
-        system: "You are a helpful assistant.",
-        model: google("gemini-2.5-flash"),
-        prompt: "What is 2 + 2?",
-      }
-    );
+    const workflowId = event.data.workflowId;
 
-    const { steps: openaiSteps } = await step.ai.wrap(
-      "openai-generate-text",
-      generateText,
-      {
-        system: "You are a helpful assistant.",
-        model: openai("gpt-4o-mini"),
-        prompt: "What is 2 + 2?",
-      }
-    );
+    if (!workflowId) {
+      throw new NonRetriableError(`Workflow Id is missing!`);
+    }
 
-    const { steps: anthropicSteps } = await step.ai.wrap(
-      "anthropic-generate-text",
-      generateText,
-      {
-        system: "You are a helpful assistant.",
-        model: anthropic("claude-3-5-sonnet-20240620"),
-        prompt: "What is 2 + 2?",
-      }
-    );
+    const sortedNodes = await step.run("prepare-workflow", async () => {
+      const workflow = await prisma.workflow.findUniqueOrThrow({
+        where: {
+          id: workflowId,
+        },
+        include: {
+          nodes: true,
+          connections: true,
+        },
+      });
 
-    return {
-      geminiSteps,
-      // openaiSteps,
-      anthropicSteps,
-    };
+      return toplogicalSort(workflow.nodes, workflow.connections);
+    });
+
+    // Initialize context with any initial data from the trigger
+    let context = event.data.initialData || {};
+
+    // Execute each node in order
+    for (const node of sortedNodes) {
+      const executor = getExecutor(node.type as NodeType);
+
+      context = await executor({
+        data: node.data as Record<string, unknown>,
+        nodeId: node.id,
+        context,
+        step,
+      });
+    }
+
+    return { workflowId, result: context };
   }
 );

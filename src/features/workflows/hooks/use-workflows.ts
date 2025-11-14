@@ -92,3 +92,47 @@ export const useRenameWorkflow = () => {
     })
   );
 };
+
+/**
+ * Hook to update a workflow
+ */
+export const useUpdateWorkflow = (options?: { showToast?: boolean }) => {
+  const { showToast = true } = options || {};
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
+
+  return useMutation(
+    trpc.workflows.update.mutationOptions({
+      onSuccess: (workflow) => {
+        if (showToast) {
+          toast.success(`Workflow "${workflow.name}" saved successfully!`);
+        }
+        queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({}));
+        queryClient.invalidateQueries(
+          trpc.workflows.getOne.queryOptions({ id: workflow.id })
+        );
+      },
+      onError: (error) => {
+        toast.error(`Failed to save workflow: ${error.message}`);
+      },
+    })
+  );
+};
+
+/**
+ * Hook to execute a workflow
+ */
+export const useExecuteWorkflow = () => {
+  const trpc = useTRPC();
+
+  return useMutation(
+    trpc.workflows.execute.mutationOptions({
+      onSuccess: (workflow) => {
+        toast.success(`Workflow "${workflow.name}" executed successfully!`);
+      },
+      onError: (error) => {
+        toast.error(`Failed to execute workflow: ${error.message}`);
+      },
+    })
+  );
+};

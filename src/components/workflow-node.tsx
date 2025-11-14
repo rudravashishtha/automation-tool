@@ -2,14 +2,16 @@
 
 import type { ReactNode } from "react";
 import { NodeToolbar, Position } from "@xyflow/react";
-import { SettingsIcon, TrashIcon } from "lucide-react";
+import { CopyIcon, SettingsIcon, TrashIcon } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface WorkflowNodeProps {
   children: ReactNode;
   showToolbar?: boolean;
+  showCopyButton?: boolean;
   onDelete?: () => void;
   onSettings?: () => void;
+  onCopyNode?: () => void;
   name?: string;
   description?: string;
 }
@@ -17,8 +19,10 @@ interface WorkflowNodeProps {
 export function WorkflowNode({
   children,
   showToolbar = true,
+  showCopyButton = true,
   onDelete,
   onSettings,
+  onCopyNode,
   name,
   description,
 }: WorkflowNodeProps) {
@@ -32,6 +36,11 @@ export function WorkflowNode({
           <Button size="sm" variant="ghost" onClick={onDelete}>
             <TrashIcon className="size-4" color="#E9192D" />
           </Button>
+          {showCopyButton && (
+            <Button size="sm" variant="ghost" onClick={onCopyNode}>
+              <CopyIcon />
+            </Button>
+          )}
         </NodeToolbar>
       )}
       {children}
