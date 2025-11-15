@@ -16,6 +16,7 @@ import {
   type NodeStatus,
   NodeStatusIndicator,
 } from "@/components/react-flow/node-status-indicator";
+import { toast } from "sonner";
 
 interface BaseExecutionNodeProps extends NodeProps {
   icon: LucideIcon | string;
@@ -77,19 +78,23 @@ export const BaseExecutionNode = memo(
     const handleCopyNode = () => {
       const selectedNode = getNode(id);
 
-      const { type: selectedNodeType, position: { x, y } = {} } =
-        selectedNode || {};
+      const {
+        data = {},
+        type: selectedNodeType,
+        position: { x, y } = {},
+      } = selectedNode || {};
 
       if (!selectedNodeType || !x || !y) return;
 
       const copiedNode = {
         id: createId(),
-        data: {},
+        data,
         position: { x: x + 80, y },
         type: selectedNodeType,
       };
 
       setNodes((nodes) => [...nodes, copiedNode]);
+      toast.success("Copied Successfully!");
     };
 
     return (

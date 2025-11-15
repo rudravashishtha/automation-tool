@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "inngest:dev": "inngest-cli dev",
+    "inngest:dev": "npx inngest-cli dev",
     "lint": "biome check",
     "format": "biome format --write"
   },

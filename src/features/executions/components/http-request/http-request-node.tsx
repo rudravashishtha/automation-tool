@@ -4,12 +4,17 @@ import { useReactFlow, type Node, type NodeProps } from "@xyflow/react";
 import { memo, useState } from "react";
 import { BaseExecutionNode } from "../base-execution-node";
 import { GlobeIcon } from "lucide-react";
-import { HttpRequestDialog, HttpRequestFormValues } from "./http-request-dialog";
+import {
+  HttpRequestDialog,
+  HttpRequestFormValues,
+} from "./http-request-dialog";
 
 type HttpRequestNodeData = {
+  headers?: string;
   endpoint?: string;
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   body?: string;
+  variableName?: string;
 };
 
 type HttpRequestNodeType = Node<HttpRequestNodeData>;
