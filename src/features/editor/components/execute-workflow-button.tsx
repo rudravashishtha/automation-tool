@@ -42,7 +42,7 @@ export const ExecuteWorkflowButton = ({
 
   return (
     <Button size="lg" disabled={isAnyPending} onClick={handleSaveAndExecute}>
-      <FlaskConicalIcon className="size-4" /> Execute Workflow
+      <FlaskConicalIcon className="size-4" /> Save and Execute Workflow
     </Button>
   );
 };
