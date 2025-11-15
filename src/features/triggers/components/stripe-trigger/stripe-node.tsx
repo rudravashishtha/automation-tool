@@ -1,19 +1,19 @@
 import { memo, useState } from "react";
 import { NodeProps } from "@xyflow/react";
 import { BaseTriggerNode } from "../base-trigger-node";
-import { GoogleFormTriggerDialog } from "./google-form-dialog";
 import { useNodeStatus } from "@/features/executions/hooks/use-node-status";
-import { GOOGLE_FORM_TRIGGER_EXECUTION_CHANNEL_NAME } from "@/inngest/channels/google-form-trigger";
-import { fetchGoogleFormTriggerRealtimeToken } from "./actions";
+import { STRIPE_TRIGGER_EXECUTION_CHANNEL_NAME } from "@/inngest/channels/stripe-trigger";
+import { StripeTriggerDialog } from "./stripe-dialog";
+import { fetchStripeTriggerRealtimeToken } from "./actions";
 
-export const GoogleFormTriggerNode = memo((props: NodeProps) => {
+export const StripeTriggerNode = memo((props: NodeProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const nodeStatus = useNodeStatus({
     nodeId: props.id,
-    channel: GOOGLE_FORM_TRIGGER_EXECUTION_CHANNEL_NAME,
+    channel: STRIPE_TRIGGER_EXECUTION_CHANNEL_NAME,
     topic: "status",
-    refreshToken: fetchGoogleFormTriggerRealtimeToken,
+    refreshToken: fetchStripeTriggerRealtimeToken,
   });
 
   const handleOpenSettings = () => {
@@ -22,12 +22,12 @@ export const GoogleFormTriggerNode = memo((props: NodeProps) => {
 
   return (
     <>
-      <GoogleFormTriggerDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <StripeTriggerDialog open={dialogOpen} onOpenChange={setDialogOpen} />
       <BaseTriggerNode
         {...props}
-        icon={"/logos/googleform.svg"}
-        name="Google Form"
-        description="On Form Submission"
+        icon={"/logos/stripe.svg"}
+        name="Stripe"
+        description="When stripe event is captured."
         status={nodeStatus}
         onSettings={handleOpenSettings}
         onDoubleClick={handleOpenSettings}
