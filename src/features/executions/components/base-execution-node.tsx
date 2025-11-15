@@ -75,7 +75,9 @@ export const BaseExecutionNode = memo(
       });
     };
 
-    const handleCopyNode = () => {
+    const handleCopyNode = ({
+      copyData = false,
+    }: { copyData?: boolean } = {}): void => {
       const selectedNode = getNode(id);
 
       const {
@@ -88,7 +90,7 @@ export const BaseExecutionNode = memo(
 
       const copiedNode = {
         id: createId(),
-        data,
+        data: copyData ? data : {},
         position: { x: x + 80, y },
         type: selectedNodeType,
       };
