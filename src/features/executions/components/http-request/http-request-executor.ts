@@ -8,6 +8,7 @@ type HttpRequestData = {
   endpoint?: string;
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: string;
+  variableName?: string;
 };
 
 export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
@@ -16,9 +17,14 @@ export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
   context,
   step,
 }) => {
-  // Ensure endpoint is configured
   if (!data.endpoint) {
     throw new NonRetriableError("HTTP Request node: No endpoint configured");
+  }
+
+  if (!data.variableName) {
+    throw new NonRetriableError(
+      "HTTP Request node: No variable name configured"
+    );
   }
 
   const result = await step.run("http-request", async () => {
@@ -52,7 +58,6 @@ export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
       );
 
       if (!hasContentType) {
-        // Only add when the user hasn't provided Content-Type
         parsedHeaders["Content-Type"] = "application/json";
       }
     }
@@ -68,14 +73,25 @@ export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
       ? await response.json().catch(() => response.text())
       : await response.text();
 
-    // Return context augmented with httpResponse
-    return {
-      ...context,
+    const responsePayload = {
       httpResponse: {
         status: response.status,
         statusText: response.statusText,
         data: responseData,
       },
+    };
+
+    if (data.variableName) {
+      return {
+        ...context,
+        [data.variableName]: responsePayload,
+      };
+    }
+
+    // Fallback to direct httpResponse
+    return {
+      ...context,
+      ...responsePayload,
     };
   });
 
