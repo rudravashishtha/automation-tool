@@ -31,7 +31,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { tryParseHeaders } from "@/lib/utils";
+import { tryParseHeaders } from "./utils";
 
 const headersValidation = z
   .string()

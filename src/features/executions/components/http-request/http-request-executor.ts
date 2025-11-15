@@ -2,7 +2,7 @@ import Handlebars from "handlebars";
 import ky, { type Options as KyOptions } from "ky";
 import type { NodeExecutor } from "@/features/executions/types";
 import { NonRetriableError } from "inngest";
-import { tryParseHeaders } from "@/lib/utils";
+import { tryParseHeaders } from "./utils";
 import { httpRequestChannel } from "@/inngest/channels/http-request";
 
 Handlebars.registerHelper("json", (context) => {
