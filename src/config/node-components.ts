@@ -5,8 +5,9 @@ import { HttpRequestNode } from "@/features/executions/components/http-request/h
 import { ManualTriggerNode } from "@/features/triggers/components/manual-trigger/manual-trigger-node";
 import { GoogleFormTriggerNode } from "@/features/triggers/components/google-form-trigger/google-form-node";
 import { StripeTriggerNode } from "@/features/triggers/components/stripe-trigger/stripe-node";
-import { GeminiNode } from "@/features/executions/components/gemini/gemini-node";
 import { DisplayNode } from "@/features/executions/components/display/display-node";
+import { GeminiNode } from "@/features/executions/components/gemini/gemini-node";
+import { OpenAINode } from "@/features/executions/components/openai/openai-node";
 
 export const nodeComponents = {
   [NodeType.INITIAL]: InitialNode,
@@ -14,8 +15,9 @@ export const nodeComponents = {
   [NodeType.HTTP_REQUEST]: HttpRequestNode,
   [NodeType.GOOGLE_FORM_TRIGGER]: GoogleFormTriggerNode,
   [NodeType.STRIPE_TRIGGER]: StripeTriggerNode,
-  [NodeType.GEMINI]: GeminiNode,
   [NodeType.DISPLAY]: DisplayNode,
+  [NodeType.GEMINI]: GeminiNode,
+  [NodeType.OPENAI]: OpenAINode,
 } as const satisfies NodeTypes;
 
 export type RegisteredNodeType = keyof typeof nodeComponents;

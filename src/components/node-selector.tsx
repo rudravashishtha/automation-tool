@@ -59,6 +59,12 @@ const executionNodes: NodeTypeOption[] = [
     description: "Use Google Gemini to generate responses based on prompts.",
     icon: "/logos/gemini.svg",
   },
+  {
+    type: NodeType.OPENAI,
+    label: "OpenAI",
+    description: "Use OpenAI to generate responses based on prompts.",
+    icon: "/logos/openai.svg",
+  },
 ];
 
 const displayNodes: NodeTypeOption[] = [
