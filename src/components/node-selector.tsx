@@ -12,7 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./ui/sheet";
-import { GlobeIcon, MousePointerIcon } from "lucide-react";
+import { GlobeIcon, MonitorIcon, MousePointerIcon } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { useReactFlow } from "@xyflow/react";
 
@@ -52,6 +52,21 @@ const executionNodes: NodeTypeOption[] = [
     description:
       "Connect to any website or API to get or send information as part of your flow.",
     icon: GlobeIcon,
+  },
+  {
+    type: NodeType.GEMINI,
+    label: "Gemini",
+    description: "Use Google Gemini to generate responses based on prompts.",
+    icon: "/logos/gemini.svg",
+  },
+];
+
+const displayNodes: NodeTypeOption[] = [
+  {
+    type: NodeType.DISPLAY,
+    label: "Display",
+    description: "Show results in a window.",
+    icon: MonitorIcon,
   },
 ];
 
@@ -159,6 +174,39 @@ export function NodeSelector({
         <Separator />
         <div>
           {executionNodes.map((nodeType) => {
+            const Icon = nodeType.icon;
+            return (
+              <div
+                key={nodeType.type}
+                className="w-full justify-start h-auto py-5 px-4 rounded-none cursor-pointer border-l-2 border-transparent hover:border-l-primary"
+                onClick={() => handleNodeSelect(nodeType)}
+              >
+                <div className="flex items-center gap-6 w-full overflow-hidden">
+                  {typeof Icon === "string" ? (
+                    <img
+                      src={Icon}
+                      alt={nodeType.label}
+                      className="size-5 object-contain rounded-sm"
+                    />
+                  ) : (
+                    <Icon className="size-5" />
+                  )}
+                  <div className="flex flex-col items-start text-left">
+                    <span className="font-medium text-sm">
+                      {nodeType.label}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {nodeType.description}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <Separator />
+        <div>
+          {displayNodes.map((nodeType) => {
             const Icon = nodeType.icon;
             return (
               <div

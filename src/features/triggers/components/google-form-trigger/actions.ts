@@ -15,5 +15,5 @@ export async function fetchGoogleFormTriggerRealtimeToken(): Promise<GoogleFormT
     topics: ["status"],
   });
 
-  return token;
+  return token as GoogleFormTriggerToken;
 }

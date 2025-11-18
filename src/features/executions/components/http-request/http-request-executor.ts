@@ -78,6 +78,7 @@ export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
       }
 
       const { method } = data;
+      console.log({ data });
       const endpoint = Handlebars.compile(data.endpoint)(context);
 
       const compiledHeaders = Handlebars.compile(data.headers || "")(context);

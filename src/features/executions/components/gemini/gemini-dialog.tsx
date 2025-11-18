@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -31,33 +31,33 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { tryParseHeaders } from "./utils";
+import { Switch } from "@/components/ui/switch";
 
-const headersValidation = z
-  .string()
-  .transform((v) => (v == null ? "" : v))
-  .refine(
-    (val) => {
-      if (val.trim() === "") return true; // allow empty
-      try {
-        tryParseHeaders(val);
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    {
-      message: "Invalid headers. Provide a JSON object.",
-    }
-  );
+export const AVAILABLE_MODELS = [
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-001",
+  "gemini-2.0-flash-live-001",
+  "gemini-2.0-flash-lite",
+  "gemini-2.0-pro-exp-02-05",
+  "gemini-2.0-flash-thinking-exp-01-21",
+  "gemini-2.0-flash-exp",
+  "gemini-2.5-pro",
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-image-preview",
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-flash-lite-preview-09-2025",
+  "gemini-2.5-flash-preview-04-17",
+  "gemini-2.5-flash-preview-09-2025",
+  "gemini-2.5-pro-exp-03-25",
+  "gemini-exp-1206",
+  "gemma-3-12b-it",
+  "gemma-3-27b-it",
+] as const;
 
 const formSchema = z.object({
-  headers: headersValidation,
-  endpoint: z.url({
-    message: "Please enter a valid URL.",
-  }),
-  method: z.enum(["GET", "POST", "PUT", "DELETE", "PATCH"]),
-  body: z.string().optional(),
+  model: z.enum(AVAILABLE_MODELS),
+  systemPrompt: z.string().optional(),
+  userPrompt: z.string().min(1, "User prompt is required"),
   variableName: z
     .string()
     .min(1, {
@@ -69,47 +69,47 @@ const formSchema = z.object({
     }),
 });
 
-export type HttpRequestFormValues = z.infer<typeof formSchema>;
+export type GeminiFormValues = z.infer<typeof formSchema>;
 
-interface HttpRequestDialogProps {
+interface GeminiDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: z.infer<typeof formSchema>) => void;
-  defaultValues?: Partial<HttpRequestFormValues>;
+  defaultValues?: Partial<GeminiFormValues>;
 }
 
-export const HttpRequestDialog = ({
+export const GeminiDialog = ({
   open,
   onOpenChange,
   onSubmit,
   defaultValues = {},
-}: HttpRequestDialogProps) => {
+}: GeminiDialogProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
-      headers: defaultValues.headers || "",
-      endpoint: defaultValues.endpoint || "",
-      method: defaultValues.method || "GET",
-      body: defaultValues.body || "",
+      model: defaultValues.model || AVAILABLE_MODELS[0],
+      systemPrompt: defaultValues.systemPrompt || "",
+      userPrompt: defaultValues.userPrompt || "",
       variableName: defaultValues.variableName || "",
     },
     resolver: zodResolver(formSchema),
   });
 
+  const [showSystemPrompt, setShowSystemPrompt] = useState<boolean>(
+    Boolean(defaultValues.systemPrompt)
+  );
+
   // Reset form values when dialog opens with new defaults
   useEffect(() => {
     if (open)
       form.reset({
-        headers: defaultValues.headers || "",
-        endpoint: defaultValues.endpoint || "",
-        method: defaultValues.method || "GET",
-        body: defaultValues.body || "",
+        model: defaultValues.model || AVAILABLE_MODELS[0],
+        systemPrompt: defaultValues.systemPrompt || "",
+        userPrompt: defaultValues.userPrompt || "",
         variableName: defaultValues.variableName || "",
       });
   }, [open, defaultValues, form]);
 
-  const watchVariableName = form.watch("variableName") || "myApiCall";
-  const watchMethod = form.watch("method");
-  const showBodyField = ["POST", "PUT", "PATCH"].includes(watchMethod);
+  const watchVariableName = form.watch("variableName") || "myModel";
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     onSubmit(values);
@@ -120,9 +120,9 @@ export const HttpRequestDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] w-[min(90vw,640px)] overflow-hidden">
         <DialogHeader>
-          <DialogTitle>HTTP Request</DialogTitle>
+          <DialogTitle>Gemini Configuration</DialogTitle>
           <DialogDescription>
-            Configure settings for the HTTP Request Node.
+            Configure the AI model and prompts for this node.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -138,11 +138,11 @@ export const HttpRequestDialog = ({
                   <FormItem>
                     <FormLabel>Variable Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="myApiCall" {...field} />
+                      <Input placeholder="myModel" {...field} />
                     </FormControl>
                     <FormDescription>
                       Use this name to reference the response in subsequent
-                      nodes: {`{{${watchVariableName}.httpResponse.data}}`}
+                      nodes: {`{{${watchVariableName}.generatedText}}`}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -150,50 +150,29 @@ export const HttpRequestDialog = ({
               />
               <FormField
                 control={form.control}
-                name="headers"
+                name="model"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Headers</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='{"Authorization": "Bearer {{authToken}}", "X-User": "{{user.id}}"}'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Provide headers as key-value pairs. You can use{" "}
-                      {"{{variables}}"} for simple values or{" "}
-                      {"{{json variable}}"} to inject stringified objects.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="method"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Method</FormLabel>
+                    <FormLabel>Model</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a method" />
+                          <SelectValue placeholder="Select a Model" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="GET">GET</SelectItem>
-                        <SelectItem value="POST">POST</SelectItem>
-                        <SelectItem value="PUT">PUT</SelectItem>
-                        <SelectItem value="DELETE">DELETE</SelectItem>
-                        <SelectItem value="PATCH">PATCH</SelectItem>
+                        {AVAILABLE_MODELS.map((model) => (
+                          <SelectItem key={model} value={model}>
+                            {model}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      The HTTP method to use for the request.
+                      The Google Gemini Model to use for this request.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -201,44 +180,52 @@ export const HttpRequestDialog = ({
               />
               <FormField
                 control={form.control}
-                name="endpoint"
+                name="userPrompt"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Endpoint URL</FormLabel>
+                    <FormLabel>User Prompt</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="https://api.example.com/users/{{httpResponse.data.id}}"
+                      <Textarea
+                        placeholder="Summarize the following text into bullet points: {{json response.data}}"
+                        className="min-h-[120px] max-h-[200px] font-mono text-sm"
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      Static URL or use {"{{variables}}"} for simple values or{" "}
+                      The prompt will be sent to the AI model . Use{" "}
+                      {"{{variables}}"} for simple values or{" "}
                       {"{{json variable}}"} to stringify objects
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              {showBodyField && (
+              <FormItem className="flex items-center">
+                <Switch
+                  checked={showSystemPrompt}
+                  onCheckedChange={(checked) => setShowSystemPrompt(checked)}
+                />
+                <FormDescription>Advanced Options</FormDescription>
+              </FormItem>
+
+              {showSystemPrompt && (
                 <FormField
                   control={form.control}
-                  name="body"
+                  name="systemPrompt"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Request Body</FormLabel>
+                      <FormLabel>System Prompt (optional)</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder={
-                            '{\n  "userId": "{{httpResponse.data.id}}", \n  "name": "{{httpResponse.data.name}}", \n  "email": "{{httpResponse.data.email}}"\n}'
-                          }
-                          className="min-h-[120px] max-h-[200px] font-mono text-sm"
+                          placeholder="You are a helpful assistant."
+                          className="min-h-[80px] max-h-[200px] font-mono text-sm"
                           {...field}
                         />
                       </FormControl>
                       <FormDescription>
-                        JSON with template variables. Use {"{{variables}}"} for
-                        simple values or {"{{json variable}}"} to stringify
-                        objects
+                        Sets the behaviour of the assistant. Use{" "}
+                        {"{{variables}}"} for simple values or{" "}
+                        {"{{json variable}}"} to stringify objects
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -247,7 +234,6 @@ export const HttpRequestDialog = ({
               )}
             </div>
 
-            {/* Footer stays visible — not inside the scrollable area */}
             <DialogFooter className="mt-4">
               <Button type="submit">Save</Button>
             </DialogFooter>
