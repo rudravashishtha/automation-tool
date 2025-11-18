@@ -14,9 +14,10 @@ interface WorkflowNodeProps {
   children: ReactNode;
   showToolbar?: boolean;
   showCopyButton?: boolean;
+  showCopyDataButton?: boolean;
   onDelete?: () => void;
   onSettings?: () => void;
-  onCopyNode: (arg?: { copyData: boolean }) => void;
+  onCopyNode?: (arg?: { copyData: boolean }) => void;
   name?: string;
   description?: string;
 }
@@ -25,6 +26,7 @@ export function WorkflowNode({
   children,
   showToolbar = true,
   showCopyButton = true,
+  showCopyDataButton = true,
   onDelete,
   onSettings,
   onCopyNode,
@@ -45,17 +47,17 @@ export function WorkflowNode({
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => onCopyNode()}
+              onClick={() => onCopyNode?.()}
               title={"Copy node definition"}
             >
               <CopyIcon />
             </Button>
           )}
-          {showCopyButton && (
+          {showCopyButton && showCopyDataButton && (
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => onCopyNode({ copyData: true })}
+              onClick={() => onCopyNode?.({ copyData: true })}
               title={"Copy node data"}
             >
               <ClipboardPasteIcon />

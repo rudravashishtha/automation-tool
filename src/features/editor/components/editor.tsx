@@ -21,6 +21,7 @@ import { useSuspenseWorkflow } from "@/features/workflows/hooks/use-workflows";
 import "@xyflow/react/dist/style.css";
 import { nodeComponents } from "@/config/node-components";
 import { AddNodeButton } from "./add-node-button";
+import { CleanLayoutButton } from "./clean-layout-button";
 import { useSetAtom } from "jotai";
 import { editorAtom } from "../store/atoms";
 import { ZoomSlider } from "@/components/react-flow/zoom-slider";
@@ -86,7 +87,10 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
         <Controls showFitView={false} />
         <MiniMap />
         <Panel position="top-right">
-          <AddNodeButton />
+          <div className="flex gap-2">
+            <AddNodeButton />
+            <CleanLayoutButton />
+          </div>
         </Panel>
         {hasManualTrigger && (
           <Panel position="bottom-center">
