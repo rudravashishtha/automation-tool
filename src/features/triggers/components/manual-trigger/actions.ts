@@ -15,5 +15,5 @@ export async function fetchManualTriggerRealtimeToken(): Promise<ManualTriggerTo
     topics: ["status"],
   });
 
-  return token;
+  return token as ManualTriggerToken;
 }

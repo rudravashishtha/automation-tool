@@ -15,5 +15,5 @@ export async function fetchStripeTriggerRealtimeToken(): Promise<StripeTriggerTo
     topics: ["status"],
   });
 
-  return token;
+  return token as StripeTriggerToken;
 }

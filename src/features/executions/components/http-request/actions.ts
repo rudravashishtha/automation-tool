@@ -15,5 +15,5 @@ export async function fetchHttpRequestRealtimeToken(): Promise<HttpRequestToken>
     topics: ["status"],
   });
 
-  return token;
+  return token as HttpRequestToken;
 }
