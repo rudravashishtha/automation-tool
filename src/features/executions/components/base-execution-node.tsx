@@ -26,6 +26,7 @@ interface BaseExecutionNodeProps extends NodeProps {
   status?: NodeStatus;
   onSettings?: () => void;
   onDoubleClick?: () => void;
+  showCopyDataButton?: boolean;
 }
 
 export const BaseExecutionNode = memo(
@@ -36,6 +37,7 @@ export const BaseExecutionNode = memo(
     description,
     children,
     status = "initial",
+    showCopyDataButton = true,
     onSettings,
     onDoubleClick,
   }: BaseExecutionNodeProps) => {
@@ -83,7 +85,7 @@ export const BaseExecutionNode = memo(
       const {
         data = {},
         type: selectedNodeType,
-        position: { x, y } = {},
+        position: { x: x = 0, y = 0 } = {},
       } = selectedNode || {};
 
       if (!selectedNodeType || !x || !y) return;
@@ -103,6 +105,7 @@ export const BaseExecutionNode = memo(
       <WorkflowNode
         name={name}
         description={description}
+        showCopyDataButton={showCopyDataButton}
         onDelete={handleDelete}
         onSettings={onSettings}
         onCopyNode={handleCopyNode}
