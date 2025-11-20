@@ -33,21 +33,30 @@ export const workflowsRouter = createTRPCRouter({
 
       return workflow;
     }),
-  create: premiumProcedure.mutation(({ ctx }) => {
-    return prisma.workflow.create({
-      data: {
-        name: generateSlug(3),
-        userId: ctx.auth.user.id,
-        nodes: {
-          create: {
-            type: NodeType.INITIAL,
-            position: { x: 0, y: 0 },
-            name: NodeType.INITIAL,
+  create: premiumProcedure
+    .input(
+      z
+        .object({
+          name: z.string().optional(),
+        })
+        .optional()
+    )
+    .mutation(({ ctx, input = {} }) => {
+      const { name = "" } = input;
+      return prisma.workflow.create({
+        data: {
+          name: name || generateSlug(3),
+          userId: ctx.auth.user.id,
+          nodes: {
+            create: {
+              type: NodeType.INITIAL,
+              position: { x: 0, y: 0 },
+              name: NodeType.INITIAL,
+            },
           },
         },
-      },
-    });
-  }),
+      });
+    }),
   remove: protectedProcedure
     .input(
       z.object({
