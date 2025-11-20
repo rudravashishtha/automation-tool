@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -48,6 +47,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const RegisterForm = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -59,6 +59,7 @@ const RegisterForm = () => {
   });
 
   const onSubmit = async (values: RegisterFormValues) => {
+    setIsLoading(true);
     await authClient.signUp.email(
       {
         name: values.email.split("@")[0],
@@ -73,12 +74,13 @@ const RegisterForm = () => {
         },
         onError: (ctx) => {
           toast.error(ctx.error.message);
+          setIsLoading(false);
         },
       }
     );
   };
 
-  const isPending = form.formState.isSubmitting;
+  const isPending = isLoading || form.formState.isSubmitting;
 
   return (
     <div className="flex flex-col gap-6">
