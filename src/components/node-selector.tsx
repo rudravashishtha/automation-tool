@@ -65,6 +65,12 @@ const executionNodes: NodeTypeOption[] = [
     description: "Use OpenAI to generate responses based on prompts.",
     icon: "/logos/openai.svg",
   },
+  {
+    type: NodeType.ANTHROPIC,
+    label: "Anthropic",
+    description: "Use Anthropic to generate responses based on prompts.",
+    icon: "/logos/anthropic.svg",
+  },
 ];
 
 const displayNodes: NodeTypeOption[] = [
