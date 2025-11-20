@@ -2,6 +2,7 @@ import {
   AlertTriangleIcon,
   Loader2Icon,
   MoreVerticalIcon,
+  NotebookPenIcon,
   PackageOpenIcon,
   PlusIcon,
   SearchIcon,
@@ -264,8 +265,10 @@ interface EntityItemProps {
   image?: React.ReactNode;
   actions?: React.ReactNode;
   onRemove?: () => void | Promise<void>;
+  onRename?: () => void | Promise<void>;
   isRemoving?: boolean;
   className?: string;
+  workflowId?: string;
 }
 
 export const EntityItem = ({
@@ -275,9 +278,18 @@ export const EntityItem = ({
   image,
   actions,
   onRemove,
+  onRename,
   isRemoving,
   className,
+  workflowId,
 }: EntityItemProps) => {
+  const handleRenameWorkflow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onRename) {
+      onRename();
+    }
+  };
   const handleRemoveItem = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -339,6 +351,14 @@ export const EntityItem = ({
                     >
                       <TrashIcon className="size-4" /> Delete
                     </DropdownMenuItem>
+                    {workflowId && onRename && (
+                      <DropdownMenuItem
+                        onClick={handleRenameWorkflow}
+                        className="cursor-pointer"
+                      >
+                        <NotebookPenIcon className="size-4" /> Rename
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
