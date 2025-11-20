@@ -1,0 +1,243 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+
+export const AVAILABLE_MODELS = [
+  "claude-3-haiku-20240307",
+  "claude-3-5-haiku-20241022",
+  "claude-3-5-haiku-latest",
+  "claude-haiku-4-5-20251001",
+  "claude-haiku-4-5",
+  "claude-3-7-sonnet-20250219",
+  "claude-3-7-sonnet-latest",
+  "claude-sonnet-4-20250514",
+  "claude-sonnet-4-0",
+  "claude-sonnet-4-5-20250929",
+  "claude-sonnet-4-5",
+  "claude-opus-4-20250514",
+  "claude-opus-4-0",
+  "claude-opus-4-1-20250805",
+  "claude-opus-4-1",
+] as const;
+
+const formSchema = z.object({
+  // Model is required but the required message should be custom
+  model: z.enum(AVAILABLE_MODELS),
+  systemPrompt: z.string().optional(),
+  userPrompt: z.string().min(1, "User prompt is required"),
+  variableName: z
+    .string()
+    .min(1, {
+      message: "Variable Name is required.",
+    })
+    .regex(/^[A-Za-z_$][A-Za-z0-9_$]*$/, {
+      message:
+        "Variable name must start with a letter or underscore and may contain only letters, numbers, and underscores.",
+    }),
+});
+
+export type AnthropicFormValues = z.infer<typeof formSchema>;
+
+interface AnthropicDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (values: z.infer<typeof formSchema>) => void;
+  defaultValues?: Partial<AnthropicFormValues>;
+}
+
+export const AnthropicDialog = ({
+  open,
+  onOpenChange,
+  onSubmit,
+  defaultValues = {},
+}: AnthropicDialogProps) => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    defaultValues: {
+      model: defaultValues.model || AVAILABLE_MODELS[0],
+      systemPrompt: defaultValues.systemPrompt || "",
+      userPrompt: defaultValues.userPrompt || "",
+      variableName: defaultValues.variableName || "",
+    },
+    resolver: zodResolver(formSchema),
+  });
+
+  const [showSystemPrompt, setShowSystemPrompt] = useState<boolean>(
+    Boolean(defaultValues.systemPrompt)
+  );
+
+  // Reset form values when dialog opens with new defaults
+  useEffect(() => {
+    if (open)
+      form.reset({
+        model: defaultValues.model || AVAILABLE_MODELS[0],
+        systemPrompt: defaultValues.systemPrompt || "",
+        userPrompt: defaultValues.userPrompt || "",
+        variableName: defaultValues.variableName || "",
+      });
+  }, [open, defaultValues, form]);
+
+  const watchVariableName = form.watch("variableName") || "myModel";
+
+  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    onSubmit(values);
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] w-[min(90vw,640px)] overflow-hidden">
+        <DialogHeader>
+          <DialogTitle>Anthropic Configuration</DialogTitle>
+          <DialogDescription>
+            Configure the AI model and prompts for this node.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="flex flex-col h-[calc(85vh-6rem)]"
+          >
+            <div className="flex-1 overflow-y-auto space-y-8 mt-4 px-1">
+              <FormField
+                control={form.control}
+                name="variableName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Variable Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="myModel" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Use this name to reference the response in subsequent
+                      nodes: {`{{${watchVariableName}.generatedText}}`}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="model"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Model</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a Model" defaultValue={AVAILABLE_MODELS[0]} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {AVAILABLE_MODELS.map((model) => (
+                          <SelectItem key={model} value={model}>
+                            {model}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      The Anthropic Model to use for this request.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="userPrompt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>User Prompt</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Summarize the following text into bullet points: {{json response.data}}"
+                        className="min-h-[120px] max-h-[200px] font-mono text-sm"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      The prompt will be sent to the AI model . Use{" "}
+                      {"{{variables}}"} for simple values or{" "}
+                      {"{{json variable}}"} to stringify objects
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormItem className="flex items-center">
+                <Switch
+                  checked={showSystemPrompt}
+                  onCheckedChange={(checked) => setShowSystemPrompt(checked)}
+                />
+                <FormDescription>Advanced Options</FormDescription>
+              </FormItem>
+
+              {showSystemPrompt && (
+                <FormField
+                  control={form.control}
+                  name="systemPrompt"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>System Prompt (optional)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="You are a helpful assistant."
+                          className="min-h-[80px] max-h-[200px] font-mono text-sm"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Sets the behaviour of the assistant. Use{" "}
+                        {"{{variables}}"} for simple values or{" "}
+                        {"{{json variable}}"} to stringify objects
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+
+            <DialogFooter className="mt-4">
+              <Button type="submit">Save</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+};
