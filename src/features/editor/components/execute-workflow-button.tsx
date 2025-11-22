@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { FlaskConicalIcon } from "lucide-react";
+import { FlaskConicalIcon, Loader2Icon } from "lucide-react";
 import {
   useExecuteWorkflow,
   useUpdateWorkflow,
@@ -16,6 +16,16 @@ export const ExecuteWorkflowButton = ({
   const saveWorkflow = useUpdateWorkflow({ showToast: false });
   const editor = useAtomValue(editorAtom);
 
+  const handleExecuteOnly = async () => {
+    if (!workflowId) return;
+
+    try {
+      await executeWorkflow.mutateAsync({ id: workflowId });
+    } catch (error) {
+      console.error("Execute workflow failed", error);
+    }
+  };
+
   const handleSaveAndExecute = async () => {
     if (!editor || !workflowId) return;
 
@@ -23,26 +33,51 @@ export const ExecuteWorkflowButton = ({
     const edges = editor.getEdges();
 
     try {
-      // Await save to complete before executing
       await saveWorkflow.mutateAsync({
         id: workflowId,
         nodes,
         edges,
       });
 
-      // Execute the workflow only after successful save
       await executeWorkflow.mutateAsync({ id: workflowId });
     } catch (error) {
-      // Handle error (optional)
       console.error("Save or execute workflow failed", error);
     }
   };
 
-  const isAnyPending = saveWorkflow.isPending || executeWorkflow.isPending;
+  const isSaving = saveWorkflow.isPending;
+  const isExecuting = executeWorkflow.isPending;
+  const isAnyPending = isSaving || isExecuting;
 
   return (
-    <Button size="lg" disabled={isAnyPending} onClick={handleSaveAndExecute}>
-      <FlaskConicalIcon className="size-4" /> Save and Execute Workflow
-    </Button>
+    <div className="flex flex-wrap items-center gap-2">
+      {isAnyPending ? (
+        <Button size="lg" disabled className="w-full sm:w-auto">
+          <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+          {isSaving ? "Saving..." : "Executing..."}
+        </Button>
+      ) : (
+        <>
+          <Button
+            size="lg"
+            variant="outline"
+            disabled={!workflowId}
+            onClick={handleExecuteOnly}
+          >
+            <FlaskConicalIcon className="mr-2 h-4 w-4" />
+            Execute (last saved)
+          </Button>
+
+          <Button
+            size="lg"
+            disabled={!workflowId || !editor}
+            onClick={handleSaveAndExecute}
+          >
+            <FlaskConicalIcon className="mr-2 h-4 w-4" />
+            Save & Execute
+          </Button>
+        </>
+      )}
+    </div>
   );
 };
