@@ -9,6 +9,8 @@ import { DisplayNode } from "@/features/executions/components/display/display-no
 import { GeminiNode } from "@/features/executions/components/gemini/gemini-node";
 import { OpenAINode } from "@/features/executions/components/openai/openai-node";
 import { AnthropicNode } from "@/features/executions/components/anthropic/anthropic-node";
+import { DeepseekNode } from "@/features/executions/components/deepseek/deepseek-node";
+import { GrokNode } from "@/features/executions/components/grok/grok-node";
 
 export const nodeComponents = {
   [NodeType.INITIAL]: InitialNode,
@@ -20,6 +22,8 @@ export const nodeComponents = {
   [NodeType.GEMINI]: GeminiNode,
   [NodeType.OPENAI]: OpenAINode,
   [NodeType.ANTHROPIC]: AnthropicNode,
+  [NodeType.DEEPSEEK]: DeepseekNode,
+  [NodeType.GROK]: GrokNode,
 } as const satisfies NodeTypes;
 
 export type RegisteredNodeType = keyof typeof nodeComponents;
