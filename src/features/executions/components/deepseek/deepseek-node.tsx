@@ -19,6 +19,7 @@ type DeepseekNodeData = {
   userPrompt: string;
   systemPrompt?: string;
   variableName?: string;
+  credentialId?: string;
 };
 
 type DeepseekNodeType = Node<DeepseekNodeData>;

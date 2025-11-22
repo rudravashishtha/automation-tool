@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import z from "zod";
+import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -32,6 +33,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
+import { CredentialType } from "@/generated/prisma";
 
 export const AVAILABLE_MODELS = ["deepseek-chat", "deepseek-reasoner"] as const;
 
@@ -48,6 +51,7 @@ const formSchema = z.object({
       message:
         "Variable name must start with a letter or underscore and may contain only letters, numbers, and underscores.",
     }),
+  credentialId: z.string().min(1, "Credential is required."),
 });
 
 export type DeepseekFormValues = z.infer<typeof formSchema>;
@@ -65,12 +69,15 @@ export const DeepseekDialog = ({
   onSubmit,
   defaultValues = {},
 }: DeepseekDialogProps) => {
+  const { data: credentials = [], isLoading: isLoadingCredentials } =
+    useCredentialsByType(CredentialType.DEEPSEEK);
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       model: defaultValues.model || AVAILABLE_MODELS[0],
       systemPrompt: defaultValues.systemPrompt || "",
       userPrompt: defaultValues.userPrompt || "",
       variableName: defaultValues.variableName || "",
+      credentialId: defaultValues.credentialId || "",
     },
     resolver: zodResolver(formSchema),
   });
@@ -87,6 +94,7 @@ export const DeepseekDialog = ({
         systemPrompt: defaultValues.systemPrompt || "",
         userPrompt: defaultValues.userPrompt || "",
         variableName: defaultValues.variableName || "",
+        credentialId: defaultValues.credentialId || "",
       });
   }, [open, defaultValues, form]);
 
@@ -125,6 +133,40 @@ export const DeepseekDialog = ({
                       Use this name to reference the response in subsequent
                       nodes: {`{{${watchVariableName}.generatedText}}`}
                     </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="credentialId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Credential</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={isLoadingCredentials || !credentials.length}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a Credential" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {credentials.map((credential) => (
+                          <SelectItem key={credential.id} value={credential.id}>
+                            <Image
+                              src="/logos/deepseek.svg"
+                              alt="Deepseek"
+                              width={16}
+                              height={16}
+                            />
+                            {credential.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

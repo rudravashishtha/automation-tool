@@ -32,6 +32,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
+import { CredentialType } from "@/generated/prisma";
+import Image from "next/image";
 
 export const AVAILABLE_MODELS = [
   "claude-3-haiku-20240307",
@@ -64,6 +67,7 @@ const formSchema = z.object({
       message:
         "Variable name must start with a letter or underscore and may contain only letters, numbers, and underscores.",
     }),
+  credentialId: z.string().min(1, "Credential is required."),
 });
 
 export type AnthropicFormValues = z.infer<typeof formSchema>;
@@ -81,12 +85,15 @@ export const AnthropicDialog = ({
   onSubmit,
   defaultValues = {},
 }: AnthropicDialogProps) => {
+  const { data: credentials = [], isLoading: isLoadingCredentials } =
+    useCredentialsByType(CredentialType.ANTHROPIC);
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       model: defaultValues.model || AVAILABLE_MODELS[0],
       systemPrompt: defaultValues.systemPrompt || "",
       userPrompt: defaultValues.userPrompt || "",
       variableName: defaultValues.variableName || "",
+      credentialId: defaultValues.credentialId || "",
     },
     resolver: zodResolver(formSchema),
   });
@@ -103,6 +110,7 @@ export const AnthropicDialog = ({
         systemPrompt: defaultValues.systemPrompt || "",
         userPrompt: defaultValues.userPrompt || "",
         variableName: defaultValues.variableName || "",
+        credentialId: defaultValues.credentialId || "",
       });
   }, [open, defaultValues, form]);
 
@@ -147,6 +155,40 @@ export const AnthropicDialog = ({
               />
               <FormField
                 control={form.control}
+                name="credentialId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Credential</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={isLoadingCredentials || !credentials.length}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a Credential" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {credentials.map((credential) => (
+                          <SelectItem key={credential.id} value={credential.id}>
+                            <Image
+                              src="/logos/anthropic.svg"
+                              alt="Anthropic"
+                              width={16}
+                              height={16}
+                            />
+                            {credential.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="model"
                 render={({ field }) => (
                   <FormItem>
@@ -157,7 +199,10 @@ export const AnthropicDialog = ({
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a Model" defaultValue={AVAILABLE_MODELS[0]} />
+                          <SelectValue
+                            placeholder="Select a Model"
+                            defaultValue={AVAILABLE_MODELS[0]}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

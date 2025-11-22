@@ -175,8 +175,8 @@ export const WorkflowsEmpty = () => {
         onNew={handleCreateWorkflow}
         addNewLabel="Add Workflow"
         btnDisabled={createWorkflow.isPending}
-        message="No workflows have been created yet."
-        messageSubtitle="Start by setting up your first workflow to begin automating your process."
+        message="No workflows found."
+        messageSubtitle="Start by setting up a workflow to begin automating your process."
       />
       <WorkflowNameDialog
         open={isDialogOpen}

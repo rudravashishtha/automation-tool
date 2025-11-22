@@ -19,6 +19,7 @@ type GeminiNodeData = {
   userPrompt: string;
   systemPrompt?: string;
   variableName?: string;
+  credentialId?: string;
 };
 
 type GeminiNodeType = Node<GeminiNodeData>;

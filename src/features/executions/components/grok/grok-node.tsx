@@ -15,6 +15,7 @@ type GrokNodeData = {
   userPrompt: string;
   systemPrompt?: string;
   variableName?: string;
+  credentialId?: string;
 };
 
 type GrokNodeType = Node<GrokNodeData>;

@@ -68,6 +68,7 @@ export const EntityHeader = ({
       {!!newButtonHref && !onNew && (
         <Button size="sm" asChild>
           <Link href={newButtonHref} prefetch>
+            <PlusIcon className="size-4" />
             {newButtonLabel}
           </Link>
         </Button>

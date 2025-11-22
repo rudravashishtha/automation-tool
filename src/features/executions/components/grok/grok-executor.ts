@@ -1,6 +1,7 @@
 import { generateText } from "ai";
 import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
+import prisma from "@/lib/db";
 import { grokChannel } from "@/inngest/channels/grok";
 import { createXai } from "@ai-sdk/xai";
 import type { NodeExecutor } from "@/features/executions/types";
@@ -18,6 +19,7 @@ type GrokData = {
   userPrompt?: string;
   systemPrompt?: string;
   variableName?: string;
+  credentialId?: string;
 };
 
 export const GrokExecutor: NodeExecutor<GrokData> = async ({
@@ -44,6 +46,16 @@ export const GrokExecutor: NodeExecutor<GrokData> = async ({
     throw new NonRetriableError(`Grok Node: Variable name is missing!`);
   }
 
+  if (!data.credentialId) {
+    await publish(
+      grokChannel().status({
+        nodeId,
+        status: "error",
+      })
+    );
+    throw new NonRetriableError(`Grok Node: Credential is missing!`);
+  }
+
   if (!data.model) {
     await publish(
       grokChannel().status({
@@ -64,18 +76,22 @@ export const GrokExecutor: NodeExecutor<GrokData> = async ({
     throw new NonRetriableError(`Grok Node: User Prompt is missing!`);
   }
 
-  // TODO: Throw if credential not found
-
   const compiledUserPrompt = Handlebars.compile(data.userPrompt)(context);
 
   const compiledSystemPrompt = data.systemPrompt
     ? Handlebars.compile(data.systemPrompt)(context)
     : "You are a helpful assistant";
 
-  // TODO: Fetch credentail
-  const credentialValue = process.env.GROK_API_KEY!;
+  const credential = await step.run("get-credential", () => {
+    return prisma.credential.findUnique({ where: { id: data.credentialId } });
+  });
+
+  if (!credential) {
+    throw new NonRetriableError(`Grok Node: Credential not found!`);
+  }
+
   const grokInstance = createXai({
-    apiKey: credentialValue,
+    apiKey: credential.value,
   });
 
   try {

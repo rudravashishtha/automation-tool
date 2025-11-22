@@ -132,7 +132,8 @@ export const useExecuteWorkflow = () => {
         toast.success(`Workflow "${workflow.name}" executed successfully!`);
       },
       onError: (error) => {
-        toast.error(`Failed to execute workflow: ${error.message}`);
+        console.error("Failed to execute workflow:", error.message);
+        toast.error(`Failed to execute workflow: Something went wrong!`);
       },
     })
   );
