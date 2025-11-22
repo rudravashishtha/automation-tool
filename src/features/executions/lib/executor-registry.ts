@@ -8,6 +8,8 @@ import { DisplayExecutor } from "../components/display/display-executor";
 import { GeminiExecutor } from "../components/gemini/gemini-executor";
 import { OpenAIExecutor } from "../components/openai/openai-executor";
 import { AnthropicExecutor } from "../components/anthropic/anthropic-executor";
+import { DeepseekExecutor } from "../components/deepseek/deepseek-executor";
+import { GrokExecutor } from "../components/grok/grok-executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
   [NodeType.INITIAL]: ManualTriggerExecutor,
@@ -19,6 +21,8 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
   [NodeType.GEMINI]: GeminiExecutor,
   [NodeType.OPENAI]: OpenAIExecutor,
   [NodeType.ANTHROPIC]: AnthropicExecutor,
+  [NodeType.DEEPSEEK]: DeepseekExecutor,
+  [NodeType.GROK]: GrokExecutor,
 };
 
 export const getExecutor = (type: NodeType): NodeExecutor => {

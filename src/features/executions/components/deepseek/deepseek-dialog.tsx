@@ -33,23 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
-export const AVAILABLE_MODELS = [
-  "claude-3-haiku-20240307",
-  "claude-3-5-haiku-20241022",
-  "claude-3-5-haiku-latest",
-  "claude-haiku-4-5-20251001",
-  "claude-haiku-4-5",
-  "claude-3-7-sonnet-20250219",
-  "claude-3-7-sonnet-latest",
-  "claude-sonnet-4-20250514",
-  "claude-sonnet-4-0",
-  "claude-sonnet-4-5-20250929",
-  "claude-sonnet-4-5",
-  "claude-opus-4-20250514",
-  "claude-opus-4-0",
-  "claude-opus-4-1-20250805",
-  "claude-opus-4-1",
-] as const;
+export const AVAILABLE_MODELS = ["deepseek-chat", "deepseek-reasoner"] as const;
 
 const formSchema = z.object({
   model: z.enum(AVAILABLE_MODELS),
@@ -66,21 +50,21 @@ const formSchema = z.object({
     }),
 });
 
-export type AnthropicFormValues = z.infer<typeof formSchema>;
+export type DeepseekFormValues = z.infer<typeof formSchema>;
 
-interface AnthropicDialogProps {
+interface DeepseekDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: z.infer<typeof formSchema>) => void;
-  defaultValues?: Partial<AnthropicFormValues>;
+  defaultValues?: Partial<DeepseekFormValues>;
 }
 
-export const AnthropicDialog = ({
+export const DeepseekDialog = ({
   open,
   onOpenChange,
   onSubmit,
   defaultValues = {},
-}: AnthropicDialogProps) => {
+}: DeepseekDialogProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       model: defaultValues.model || AVAILABLE_MODELS[0],
@@ -117,7 +101,7 @@ export const AnthropicDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] w-[min(90vw,640px)] overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Anthropic Configuration</DialogTitle>
+          <DialogTitle>Deepseek Configuration</DialogTitle>
           <DialogDescription>
             Configure the AI model and prompts for this node.
           </DialogDescription>
@@ -157,7 +141,10 @@ export const AnthropicDialog = ({
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a Model" defaultValue={AVAILABLE_MODELS[0]} />
+                          <SelectValue
+                            placeholder="Select a Model"
+                            defaultValue={AVAILABLE_MODELS[0]}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -169,7 +156,7 @@ export const AnthropicDialog = ({
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      The Anthropic Model to use for this request.
+                      The Deepseek Model to use for this request.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

@@ -11,7 +11,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -98,6 +97,8 @@ enum NodeType {
   OPENAI
   GEMINI
   DISPLAY
+  DEEPSEEK
+  GROK
 }
 
 model Node {

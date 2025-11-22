@@ -113,7 +113,8 @@ export const useUpdateWorkflow = (options?: { showToast?: boolean }) => {
         );
       },
       onError: (error) => {
-        toast.error(`Failed to save workflow: ${error.message}`);
+        console.error("Failed to save workflow:", error.message);
+        toast.error(`Failed to save workflow: Something went wrong!`);
       },
     })
   );
