@@ -26,6 +26,7 @@ export const GrokExecutor: NodeExecutor<GrokData> = async ({
   data,
   nodeId,
   context,
+  userId,
   step,
   publish,
 }) => {
@@ -83,7 +84,9 @@ export const GrokExecutor: NodeExecutor<GrokData> = async ({
     : "You are a helpful assistant";
 
   const credential = await step.run("get-credential", () => {
-    return prisma.credential.findUnique({ where: { id: data.credentialId } });
+    return prisma.credential.findUnique({
+      where: { id: data.credentialId, userId },
+    });
   });
 
   if (!credential) {

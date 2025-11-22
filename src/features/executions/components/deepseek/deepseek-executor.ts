@@ -25,6 +25,7 @@ type DeepseekData = {
 export const DeepseekExecutor: NodeExecutor<DeepseekData> = async ({
   data,
   nodeId,
+  userId,
   context,
   step,
   publish,
@@ -83,7 +84,9 @@ export const DeepseekExecutor: NodeExecutor<DeepseekData> = async ({
     : "You are a helpful assistant";
 
   const credential = await step.run("get-credential", () => {
-    return prisma.credential.findUnique({ where: { id: data.credentialId } });
+    return prisma.credential.findUnique({
+      where: { id: data.credentialId, userId },
+    });
   });
 
   if (!credential) {
