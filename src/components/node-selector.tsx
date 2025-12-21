@@ -25,7 +25,12 @@ import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 
-export type NodeCategory = "trigger" | "ai" | "utility" | "output";
+export type NodeCategory =
+  | "trigger"
+  | "ai"
+  | "utility"
+  | "output"
+  | "messaging";
 
 export type NodeTypeOption = {
   type: NodeType;
@@ -34,6 +39,7 @@ export type NodeTypeOption = {
   icon: React.ComponentType<{ className?: string }> | string;
   category: NodeCategory;
   badge?: string;
+  isDisabled?: boolean;
 };
 
 const NODE_OPTIONS: NodeTypeOption[] = [
@@ -110,6 +116,31 @@ const NODE_OPTIONS: NodeTypeOption[] = [
     icon: "/logos/grok.svg",
     category: "ai",
     badge: "LLM",
+  },
+  {
+    type: NodeType.DISCORD,
+    label: "Discord",
+    description: "Send a message on discord.",
+    icon: "/logos/discord.svg",
+    category: "messaging",
+    badge: "Messaging",
+  },
+  {
+    type: NodeType.SLACK,
+    label: "Slack",
+    description: "Send a message on slack.",
+    icon: "/logos/slack.svg",
+    category: "messaging",
+    badge: "Messaging",
+  },
+  {
+    type: NodeType.WHATSAPP,
+    label: "Whatsapp",
+    description: "Senda  message on whatsapp.",
+    icon: "/logos/whatsapp.svg",
+    category: "messaging",
+    badge: "Messaging",
+    isDisabled: true,
   },
   {
     type: NodeType.DISPLAY,
@@ -205,6 +236,7 @@ export function NodeSelector({
         type="button"
         onClick={() => handleNodeSelect(nodeType)}
         className="flex w-full h-auto flex-col items-stretch justify-start gap-2 rounded-lg border border-border/70 bg-background/80 px-4 py-3 text-left shadow-sm transition-all hover:border-primary/60 hover:bg-accent/70 hover:shadow-md"
+        disabled={nodeType.isDisabled}
       >
         <div className="flex items-start gap-3">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
@@ -248,7 +280,7 @@ export function NodeSelector({
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-xl overflow-y-auto px-4"
+        className="w-full sm:max-w-xl overflow-y-auto px-4 pb-4"
       >
         <SheetHeader className="space-y-2 px-0">
           <SheetTitle>Add a step</SheetTitle>
@@ -285,6 +317,9 @@ export function NodeSelector({
               </TabsTrigger>
               <TabsTrigger value="utility" className="text-xs">
                 Utilities
+              </TabsTrigger>
+              <TabsTrigger value="messaging" className="text-xs">
+                Messaging
               </TabsTrigger>
               <TabsTrigger value="output" className="text-xs">
                 Output

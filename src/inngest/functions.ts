@@ -14,6 +14,8 @@ import { openaiChannel } from "./channels/openai";
 import { anthropicChannel } from "./channels/anthropic";
 import { deepseekChannel } from "./channels/deepseek";
 import { grokChannel } from "./channels/grok";
+import { discordChannel } from "./channels/discord";
+import { slackChannel } from "./channels/slack";
 
 export const executeWorkflow = inngest.createFunction(
   {
@@ -33,6 +35,8 @@ export const executeWorkflow = inngest.createFunction(
       anthropicChannel(),
       deepseekChannel(),
       grokChannel(),
+      discordChannel(),
+      slackChannel(),
     ],
   },
   async ({ event, step, publish }) => {

@@ -11,6 +11,9 @@ import { OpenAINode } from "@/features/executions/components/openai/openai-node"
 import { AnthropicNode } from "@/features/executions/components/anthropic/anthropic-node";
 import { DeepseekNode } from "@/features/executions/components/deepseek/deepseek-node";
 import { GrokNode } from "@/features/executions/components/grok/grok-node";
+import { DiscordNode } from "@/features/executions/components/discord/discord-node";
+import { SlackNode } from "@/features/executions/components/slack/slack-node";
+import { WhatsAppNode } from "@/features/executions/components/whatsapp/whatsapp-node";
 
 export const nodeComponents = {
   [NodeType.INITIAL]: InitialNode,
@@ -24,6 +27,9 @@ export const nodeComponents = {
   [NodeType.ANTHROPIC]: AnthropicNode,
   [NodeType.DEEPSEEK]: DeepseekNode,
   [NodeType.GROK]: GrokNode,
+  [NodeType.DISCORD]: DiscordNode,
+  [NodeType.SLACK]: SlackNode,
+  [NodeType.WHATSAPP]: WhatsAppNode,
 } as const satisfies NodeTypes;
 
 export type RegisteredNodeType = keyof typeof nodeComponents;

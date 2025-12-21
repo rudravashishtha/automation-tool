@@ -121,6 +121,9 @@ enum NodeType {
   DISPLAY
   DEEPSEEK
   GROK
+  DISCORD
+  SLACK
+  WHATSAPP
 }
 
 model Node {
