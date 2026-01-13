@@ -7,6 +7,7 @@ import { createXai } from "@ai-sdk/xai";
 import type { NodeExecutor } from "@/features/executions/types";
 import { AVAILABLE_MODELS } from "./grok-dialog";
 import type { Model } from "./grok-node";
+import { decrypt } from "@/lib/encryption";
 
 Handlebars.registerHelper("json", (context) => {
   const jsonString = JSON.stringify(context, null, 2);
@@ -94,7 +95,7 @@ export const GrokExecutor: NodeExecutor<GrokData> = async ({
   }
 
   const grokInstance = createXai({
-    apiKey: credential.value,
+    apiKey: decrypt(credential.value),
   });
 
   try {

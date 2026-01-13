@@ -7,6 +7,7 @@ import { NonRetriableError } from "inngest";
 import { AVAILABLE_MODELS } from "./deepseek-dialog";
 import type { Model } from "./deepseek-node";
 import { deepseekChannel } from "@/inngest/channels/deepseek";
+import { decrypt } from "@/lib/encryption";
 
 Handlebars.registerHelper("json", (context) => {
   const jsonString = JSON.stringify(context, null, 2);
@@ -94,7 +95,7 @@ export const DeepseekExecutor: NodeExecutor<DeepseekData> = async ({
   }
 
   const deepseekInstance = createDeepSeek({
-    apiKey: credential.value,
+    apiKey: decrypt(credential.value),
   });
 
   try {

@@ -7,6 +7,7 @@ import { NonRetriableError } from "inngest";
 import { AVAILABLE_MODELS } from "./anthropic-dialog";
 import type { Model } from "./anthropic-node";
 import { anthropicChannel } from "@/inngest/channels/anthropic";
+import { decrypt } from "@/lib/encryption";
 
 Handlebars.registerHelper("json", (context) => {
   const jsonString = JSON.stringify(context, null, 2);
@@ -91,7 +92,7 @@ export const AnthropicExecutor: NodeExecutor<AnthropicData> = async ({
     throw new NonRetriableError(`Anthropic Node: Credential not found!`);
   }
   const anthropicInstance = createAnthropic({
-    apiKey: credential.value,
+    apiKey: decrypt(credential.value),
   });
 
   try {

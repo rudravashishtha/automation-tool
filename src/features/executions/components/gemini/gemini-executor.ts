@@ -7,6 +7,7 @@ import { NonRetriableError } from "inngest";
 import { geminiChannel } from "@/inngest/channels/gemini";
 import { AVAILABLE_MODELS } from "./gemini-dialog";
 import type { Model } from "./gemini-node";
+import { decrypt } from "@/lib/encryption";
 
 Handlebars.registerHelper("json", (context) => {
   const jsonString = JSON.stringify(context, null, 2);
@@ -94,7 +95,7 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({
   }
 
   const googleInstance = createGoogleGenerativeAI({
-    apiKey: credential.value,
+    apiKey: decrypt(credential.value),
   });
 
   try {
