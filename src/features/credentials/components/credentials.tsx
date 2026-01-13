@@ -23,11 +23,16 @@ import { useEntitySearch } from "@/hooks/use-entity-search";
 import { CREDENTIAL_LOGOS } from "@/config/constants";
 
 export const CredentialsSearch = () => {
+  const credentials = useSuspenseCredentials();
   const [params, setParams] = useCredentialsParams();
   const { searchValue, onSearchChange } = useEntitySearch({
     params,
     setParams,
   });
+
+  if (!credentials.data.totalPages) {
+    return null;
+  }
 
   return (
     <EntitySearch

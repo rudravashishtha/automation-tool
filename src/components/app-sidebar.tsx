@@ -24,6 +24,7 @@ import {
 } from "./ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { useHasActiveSubscription } from "@/features/subscriptions/hooks/use-subscription";
+import { toast } from "sonner";
 
 const menuItems = [
   {
@@ -90,7 +91,15 @@ const AppSidebar = () => {
                       asChild
                       className="gap-x-4 h-10 px-4"
                     >
-                      <Link href={item.url} prefetch>
+                      <Link
+                        href={item.url}
+                        prefetch
+                        onClick={() =>
+                          toast.info(`Navigating to ${item.title}`, {
+                            position: "top-right",
+                          })
+                        }
+                      >
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
                       </Link>

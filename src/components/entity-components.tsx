@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type EntityHeaderProps = {
   title: string;
@@ -34,6 +35,7 @@ type EntityHeaderProps = {
   newButtonLabel: string;
   disabled?: boolean;
   isCreating?: boolean;
+  showAddIcon?: boolean;
 } & (
   | { onNew: () => void; newButtonHref?: never }
   | { newButtonHref: string; onNew?: never }
@@ -47,6 +49,7 @@ export const EntityHeader = ({
   newButtonHref,
   newButtonLabel,
   disabled,
+  showAddIcon = true,
   isCreating,
 }: EntityHeaderProps) => {
   return (
@@ -61,14 +64,14 @@ export const EntityHeader = ({
       </div>
       {!!onNew && !newButtonHref && (
         <Button size="sm" onClick={onNew} disabled={disabled || isCreating}>
-          <PlusIcon className="size-4" />
+          {!!showAddIcon && <PlusIcon className="size-4" />}
           {newButtonLabel}
         </Button>
       )}
       {!!newButtonHref && !onNew && (
         <Button size="sm" asChild>
           <Link href={newButtonHref} prefetch>
-            <PlusIcon className="size-4" />
+            {!!showAddIcon && <PlusIcon className="size-4" />}
             {newButtonLabel}
           </Link>
         </Button>
@@ -193,6 +196,7 @@ interface EmptyViewProps extends StateViewProps {
   messageSubtitle?: string;
   onNew?: () => void;
   btnDisabled?: boolean;
+  showAddIcon?: boolean;
 }
 
 export const EmptyView = ({
@@ -201,6 +205,7 @@ export const EmptyView = ({
   messageSubtitle,
   onNew,
   btnDisabled,
+  showAddIcon = true,
 }: EmptyViewProps) => {
   return (
     <Empty className="border border-dashed bg-white">
@@ -216,7 +221,7 @@ export const EmptyView = ({
       {!!onNew && (
         <EmptyContent>
           <Button onClick={onNew} disabled={!!btnDisabled}>
-            <PlusIcon className="size-4" />
+            {!!showAddIcon && <PlusIcon className="size-4" />}
             {addNewLabel || "Add New"}
           </Button>
         </EmptyContent>
@@ -278,86 +283,98 @@ export const EntityItem = ({
   subtitle,
   image,
   actions,
+  right,
   onRemove,
   onRename,
   isRemoving,
   className,
   workflowId,
-}: EntityItemProps) => {
+}: EntityItemProps & { right?: React.ReactNode }) => {
   const handleRenameWorkflow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onRename) {
-      onRename();
-    }
+    onRename?.();
   };
+
   const handleRemoveItem = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     if (isRemoving) return;
-
-    if (onRemove) {
-      await onRemove();
-    }
+    await onRemove?.();
   };
+
   return (
-    <Link href={href} prefetch>
+    <Link
+      href={href}
+      prefetch
+      onClick={() =>
+        toast.info(`Navigating to ${href}`, { position: "top-right" })
+      }
+    >
       <Card
         className={cn(
-          "p-4 shadow-none hover:shadow cursor-pointer",
+          "p-4 shadow-none hover:shadow-sm transition-shadow cursor-pointer",
           isRemoving && "opacity-50 cursor-not-allowed",
           className
         )}
       >
-        <CardContent className="flex flex-row items-center justify-between p-0">
-          <div className="flex items-center gap-3">
-            {!!image ? image : null}
-            <div>
-              <CardTitle className="text-base font-medium">{title}</CardTitle>
-              {!!subtitle && (
-                <CardDescription className="text-xs">
+        <CardContent className="flex items-center justify-between p-0 gap-4">
+          {/* Left */}
+          <div className="flex items-center gap-3 min-w-0">
+            {image ?? null}
+
+            <div className="min-w-0">
+              <CardTitle className="text-sm font-medium truncate">
+                {title}
+              </CardTitle>
+
+              {subtitle && (
+                <CardDescription className="mt-0.5 text-xs">
                   {subtitle}
                 </CardDescription>
               )}
             </div>
           </div>
-          {(actions || onRemove) && (
-            <div className="flex items-center gap-x-4">
+
+          {/* Right */}
+          {(right || actions || onRemove) && (
+            <div className="flex items-center gap-x-3 shrink-0">
+              {right}
+
               {actions}
+
               {onRemove && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      className="size-4"
+                      className="size-6"
                       size="icon"
                       variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onRemove();
-                      }}
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      <MoreVerticalIcon />
+                      <MoreVerticalIcon className="size-4" />
                     </Button>
                   </DropdownMenuTrigger>
+
                   <DropdownMenuContent
                     align="end"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <DropdownMenuItem
                       onClick={handleRemoveItem}
                       className="cursor-pointer"
                     >
-                      <TrashIcon className="size-4" /> Delete
+                      <TrashIcon className="size-4" />
+                      Delete
                     </DropdownMenuItem>
+
                     {workflowId && onRename && (
                       <DropdownMenuItem
                         onClick={handleRenameWorkflow}
                         className="cursor-pointer"
                       >
-                        <NotebookPenIcon className="size-4" /> Rename
+                        <NotebookPenIcon className="size-4" />
+                        Rename
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
