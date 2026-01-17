@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
+    "postinstall": "npx prisma generate",
     "inngest:dev": "npx inngest-cli dev",
     "ngrok:dev": "dotenv -- ngrok http --url=$NGROK_URL 3000",
     "lint": "biome check",
