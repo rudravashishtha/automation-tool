@@ -51,6 +51,42 @@ const LoginForm = () => {
     },
   });
 
+  const signInGithub = async () => {
+    setIsLoading(true);
+    const data = await authClient.signIn.social(
+      {
+        provider: "github",
+      },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+        },
+        onError: () => {
+          toast.error("Something went wrong! Please try again.");
+          setIsLoading(false);
+        },
+      }
+    );
+  };
+
+  const signInGoogle = async () => {
+    setIsLoading(true);
+    const data = await authClient.signIn.social(
+      {
+        provider: "google",
+      },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+        },
+        onError: () => {
+          setIsLoading(false);
+          toast.error("Something went wrong! Please try again.");
+        },
+      }
+    );
+  };
+
   const onSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
     await authClient.signIn.email(
@@ -61,6 +97,7 @@ const LoginForm = () => {
       },
       {
         onSuccess: () => {
+          setIsLoading(false);
           toast.success("Logged in successfully!");
           router.push("/");
         },
@@ -91,6 +128,7 @@ const LoginForm = () => {
                     className="w-full"
                     type="button"
                     disabled={isPending}
+                    onClick={signInGithub}
                   >
                     <Image
                       src="/logos/github.svg"
@@ -105,6 +143,7 @@ const LoginForm = () => {
                     className="w-full"
                     type="button"
                     disabled={isPending}
+                    onClick={signInGoogle}
                   >
                     <Image
                       src="/logos/google.svg"

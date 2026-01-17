@@ -61,6 +61,42 @@ const RegisterForm = () => {
     },
   });
 
+  const signInGithub = async () => {
+    setIsLoading(true);
+    const data = await authClient.signIn.social(
+      {
+        provider: "github",
+      },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+        },
+        onError: () => {
+          setIsLoading(false);
+          toast.error("Something went wrong! Please try again.");
+        },
+      }
+    );
+  };
+
+  const signInGoogle = async () => {
+    setIsLoading(true);
+    const data = await authClient.signIn.social(
+      {
+        provider: "google",
+      },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+        },
+        onError: () => {
+          setIsLoading(false);
+          toast.error("Something went wrong! Please try again.");
+        },
+      }
+    );
+  };
+
   const onSubmit = async (values: RegisterFormValues) => {
     setIsLoading(true);
     await authClient.signUp.email(
@@ -72,6 +108,7 @@ const RegisterForm = () => {
       },
       {
         onSuccess: () => {
+          setIsLoading(false);
           toast.success("Account created successfully!");
           router.push("/");
         },
@@ -102,6 +139,7 @@ const RegisterForm = () => {
                     className="w-full"
                     type="button"
                     disabled={isPending}
+                    onClick={signInGithub}
                   >
                     <Image
                       src="/logos/github.svg"
@@ -116,6 +154,7 @@ const RegisterForm = () => {
                     className="w-full"
                     type="button"
                     disabled={isPending}
+                    onClick={signInGoogle}
                   >
                     <Image
                       src="/logos/google.svg"

@@ -145,6 +145,7 @@ const AppSidebar = () => {
               tooltip="Sign Out"
               className="gap-x-4 h-10 px-4"
               onClick={() => {
+                toast.info("Signing out...");
                 authClient.signOut({
                   fetchOptions: {
                     onSuccess: () => {
